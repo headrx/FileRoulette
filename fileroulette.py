@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 """Generate random ufile.io links until a live link is found."""
-
+import re
 import queue
 import random
 import requests
 import threading
 import webbrowser
-
+from bs4 import BeautifulSoup
 from urlgen import urlgen
 
 # A list of user agents. We'll pick one at random every time.
@@ -44,10 +44,14 @@ def create_session():
 def extract_filename(html):
     """Extract the filename from the provided HTML."""
     try:
+        soup = BeautifulSoup(html, 'lxml')
         a, b = split_after(html, '<div class="details">')
         a, b = split_after(b, '<h3>')
         a, b = split_before(b, '</h3>')
-        return a
+        details_div = soup.find('div', class_="details")
+        size = re.search('Size:(.*)', str(details_div.p))
+        details = [a, size.group(0)]  
+        return details
     except Exception as e:
         raise
 
@@ -121,12 +125,28 @@ class ScanThread(threading.Thread):
         while not self.stopped():
             url = generate_ufile_link()
             if url_is_live(url):
-                filename = retrieve_filename(url)
-                if(filename):
-                    # Found one!
-                    self.work_queue.put((url, filename))
-                    self.stop()
-            print(".", end="", flush=True)
+                try:
+                    details = retrieve_filename(url)
+                    filename = str(details[0])
+                    size = str(details[1])
+                    if filename != "None":
+                        # Found one!
+                        print("\nFound one!")
+                        print("Live URL: {}".format(url))
+                        print("Filename: {}".format(filename))
+                        with open('files.txt', 'a+') as fp:
+                            info = url + ", "+filename+", "+size+"\n"
+                            try:
+                                fp.write(info)
+                            except UnicodeEncodeError:
+                                info = url + ", "+ "BROKEN FILE NAME "+","+size+"\n"
+                                fp.write(info)
+                        #self.work_queue.put((url, filename))
+                        #self.stop()
+                        print(".", end="", flush=True)
+                except Exception:
+                    print(".", end="", flush=True)
+                    pass
 
 
 print("Scanning for a live URL", end="", flush=True)
@@ -149,7 +169,3 @@ for thread in threads:
     thread.stop()
     thread.join()
 
-print("\nFound one!")
-print("Live URL: {}".format(url))
-print("Filename: {}".format(filename))
-webbrowser.open(url)
