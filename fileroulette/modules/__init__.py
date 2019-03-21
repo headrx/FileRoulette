@@ -139,6 +139,44 @@ class BaseModule:
             session.headers.update({"User-Agent": DEF_AGENT})
         return session
 
+    def _execute_scan(self, session):
+        """Execute a single scan using the specified session.
+
+        Parameters
+        ----------
+        session
+            The requests session used to execute the scan.
+
+        Returns
+        -------
+        bool
+            Return True if we found useful data, otherwise False.
+
+        """
+        # Generate a new URL.
+        url = self._new_url()
+        # Retrieve the content of that URL.
+        content = self._get_page_content(session, url)
+        # Check to see if the content was retrieved successfully.
+        if content:
+            # The content was retrieved. Check to see if it's valuable.
+            result = self.check_output(content)
+            # Check if the result was a success.
+            if isinstance(result, dict):
+                # We got valid data!
+                print("Found one!")
+                print("Live URL: {}".format(url))
+                # Get the keys from the result, then sort them.
+                keys = list(result.keys())
+                keys.sort()
+                # Display the data collected.
+                for key in keys:
+                    print(" * {}: {}".format(key, result[key]))
+                # Return True to indicate our success.
+                return True
+        # The content couldn't be retrieved, or the data was invalid.
+        return False
+
     def _get_page_content(self, session, url):
         """Retrieve the HTML content for the specified URL.
 
@@ -158,6 +196,8 @@ class BaseModule:
         """
         # Retrieve the page's header.
         (header, url) = self._get_page_header(session, url)
+        # DEBUG: We're just checking what status code we get.
+        #print("Status code: {}".format(header.status_code))
         if header.status_code == 200:
             # The request was a success. Return the text of the site.
             return session.get(url).content.decode()
@@ -244,3 +284,7 @@ class BaseModule:
     def run(self):
         """Start the module's main loop."""
         print("Running {} module...".format(self.name))
+        session = self._create_new_session()
+        while not self._execute_scan(session):
+            print(".", end="", flush=True)
+        print("\nScan succeeded!")

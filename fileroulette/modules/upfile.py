@@ -27,7 +27,7 @@ class Module(BaseModule):
     def check_output(self, content):
         """Check the content of the page to extract useful information."""
         # Avoid files that are inaccessible or missing.
-        if "Sorry it's gone..." in result or "Premium Access Only" in result:
+        if "Sorry it's gone..." in result or "Premium Access Only" in content:
             return False
         # Attempt to extract the file name and size from the data.
         try:
