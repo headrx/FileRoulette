@@ -257,6 +257,66 @@ class BaseModule:
         """
         return urlgen(self.base_url, self.allowed_chars, self.key_length)
 
+    @staticmethod
+    def _split_after(source, target):
+        """Split a string after the target string, returning both parts.
+
+        If the target string cannot be found in the source string, this
+        function will return two empty strings.
+
+        Parameters
+        ----------
+        source : str
+            The string which will be split.
+        target : str
+            The substring to be found in the source string, after which the
+            source string will be split.
+
+        Returns
+        -------
+        a : str
+            The string preceeding and including the target substring.
+        b : str
+            The string proceeding the target substring.
+
+        """
+        if target not in source:
+            return "", ""
+        index = source.find(target) + len(target)
+        a = source[:index]
+        b = source[index:]
+        return a, b
+
+    @staticmethod
+    def _split_before(source, target):
+        """Split a string before the target string, returning both parts.
+
+        If the target string cannot be found in the source string, this
+        function will return two empty strings.
+
+        Parameters
+        ----------
+        source : str
+            The string which will be split.
+        target : str
+            The substring to be found in the source string, before which the
+            source string will be split.
+
+        Returns
+        -------
+        a : str
+            The string preceeding the target substring.
+        b : str
+            The string proceeding and including the target substring.
+
+        """
+        if target not in source:
+            return "", ""
+        index = source.find(target)
+        a = source[:index]
+        b = source[index:]
+        return a, b
+
     def check_output(self, content):
         """Check the content of the page to extract useful information.
 

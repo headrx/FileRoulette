@@ -12,12 +12,14 @@ Useful Functions
 The following functions are defined in the fileroulette.libs.__init__.py file
 to make it easier for you to write new modules.
 
-self._new_url()
-    Creates a new randomly-generated URL as defined by the three variables set
-    in the __init__ function:
-        * self.base_url
-        * self.allowed_chars
-        * self.key_length
+self._split_before(source, target)
+self._split_after(source, target)
+    These two convenience functions take two arguments: the source and target
+    strings. The function will attempt to find the target string in the source
+    string. If it can be found, the functions will split the source string
+    before or after the target string (respectively), and return the split
+    parts. If the target string cannot be found, the function will return two
+    empty strings.
 
 """
 

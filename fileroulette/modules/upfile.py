@@ -31,16 +31,16 @@ class Module(BaseModule):
             return False
         # Attempt to extract the file name and size from the data.
         try:
-            soup = BeautifulSoup(html, "lxml")
-            a, b = split_after(html, '<div class="details">')
-            a, b = split_after(b, "<h3>")
-            file_name, b = split_before(b, "</h3>")
+            soup = BeautifulSoup(content, "lxml")
+            a, b = self._split_after(content, '<div class="details">')
+            a, b = self._split_after(b, "<h3>")
+            file_name, b = self._split_before(b, "</h3>")
             details_div = soup.find("div", class_="details")
             file_size = re.search("Size:(.*)", str(details_div.p)).group(0)
         except Exception as e:
             raise
         # Determine if the file exists.
-        if file_name is not "None":
+        if file_name is not "None" and "" not in [file_name, file_size]:
             # If so, return its information.
             return_dict = {"File Name": file_name, "File Size": file_size}
             return return_dict

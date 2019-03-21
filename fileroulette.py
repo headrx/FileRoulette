@@ -110,26 +110,6 @@ def retrieve_filename(url):
     return extract_filename(result)
 
 
-def split_after(source, target):
-    """Split a string after the target string, returning both parts."""
-    if target not in source:
-        return False, False
-    index = source.find(target) + len(target)
-    a = source[:index]
-    b = source[index:]
-    return a, b
-
-
-def split_before(source, target):
-    """Split a string before the target string, returning both parts."""
-    if target not in source:
-        return False, False
-    index = source.find(target)
-    a = source[:index]
-    b = source[index:]
-    return a, b
-
-
 def url_is_live(url):
     """Check whether the given URL is live."""
     if get_url_status(url) == 200:
