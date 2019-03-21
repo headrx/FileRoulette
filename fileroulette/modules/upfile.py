@@ -1,5 +1,6 @@
 """UploadFiles.io data source module."""
 
+from bs4 import BeautifulSoup
 from fileroulette.modules import BaseModule
 
 # Set the module name based on this file's name.
@@ -22,3 +23,26 @@ class Module(BaseModule):
         self.allowed_chars = "a1"
         # Set the randomly-generated key length.
         self.key_length = 5
+
+    def check_output(self, content):
+        """Check the content of the page to extract useful information."""
+        # Avoid files that are inaccessible or missing.
+        if "Sorry it's gone..." in result or "Premium Access Only" in result:
+            return False
+        # Attempt to extract the file name and size from the data.
+        try:
+            soup = BeautifulSoup(html, "lxml")
+            a, b = split_after(html, '<div class="details">')
+            a, b = split_after(b, "<h3>")
+            file_name, b = split_before(b, "</h3>")
+            details_div = soup.find("div", class_="details")
+            file_size = re.search("Size:(.*)", str(details_div.p)).group(0)
+        except Exception as e:
+            raise
+        # Determine if the file exists.
+        if file_name is not "None":
+            # If so, return its information.
+            return_dict = {"File Name": file_name, "File Size": file_size}
+            return return_dict
+        # If this isn't a file, return False.
+        return False

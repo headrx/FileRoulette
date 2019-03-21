@@ -51,3 +51,35 @@ class Module(BaseModule):
         self.allowed_chars = "aA1"
         # Set the randomly-generated key length.
         self.key_length = 5
+
+    def check_output(self, content):
+        """Check the content of the page to extract useful information.
+
+        This function exists in the BaseModule class, but needs to be redefined
+        in each derivative module in order to custom-tailor the module to the
+        targeted site.
+
+        Parameters
+        ----------
+        content : str
+            The content returned by the server, typically text or HTML.
+
+        Returns
+        -------
+        dict or False
+            If the content is useful, return a dict containing the useful info.
+            If there is no good data, return False to continue scanning.
+
+        """
+        # Define the rules for determining whether this is desirable content,
+        # and for how to extract the useful information.
+        if "download this file" in content:
+            # If the content contains information that should be saved, create
+            # a return_data dict and store the data inside it.
+            return_data = {
+                "status": "success"
+            }
+            # Then return that data.
+            return return_data
+        # If the content is undesirable, return False.
+        return False

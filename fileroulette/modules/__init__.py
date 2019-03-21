@@ -206,7 +206,7 @@ class BaseModule:
             header = session.head(url)
         return (header, url)
 
-    def _new_url(self) -> str:
+    def _new_url(self):
         """Generate a new random URL.
 
         Returns
@@ -216,6 +216,30 @@ class BaseModule:
 
         """
         return urlgen(self.base_url, self.allowed_chars, self.key_length)
+
+    def check_output(self, content):
+        """Check the content of the page to extract useful information.
+
+        This function needs to be defined in each individual module, as this is
+        the method which determines if the page contains data we wish to save,
+        such as a live file or useful text.
+
+        Parameters
+        ----------
+        content : str
+            The content returned by the server, typically text or HTML.
+
+        Returns
+        -------
+        dict or False
+            If the content is useful, return a dict containing the useful info
+            (such as file names and sizes). This information will be either
+            printed to the screen or saved in a file, depending on the user's
+            preference. If there is no good data, return False to continue
+            scanning.
+
+        """
+        pass
 
     def run(self):
         """Start the module's main loop."""
