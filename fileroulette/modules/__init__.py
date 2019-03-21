@@ -5,6 +5,8 @@ modules can be derived. To learn more about making a new data source module,
 see the demo.py module.
 """
 
+# TODO: Enable multithreading and proxies.
+
 import random
 import requests
 
