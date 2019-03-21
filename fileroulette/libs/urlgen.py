@@ -1,20 +1,7 @@
 """Generate a random URL with the specified ruleset.
 
 This module defines the urlgen function. This function can generate random URLs
-for all kinds of services. Here are some examples of how to use it:
-
-hastebin.com
-    urlgen("https://hastebin.com/raw/{}", "a", 10)
-
-imgur.com
-    urlgen("https://imgur.com/{}", "aA1", 7)
-
-pastebin.com
-    urlgen("https://pastebin.com/{}", "aA1", 8)
-
-uploadfiles.io
-    urlgen("https://uploadfiles.io/{}", "a1", 5)
-
+for all kinds of services.
 """
 
 import random
@@ -26,9 +13,9 @@ def urlgen(template: str, charset: str, length: int) -> str:
 
     Parameters
     ----------
-    template
+    template : str
         A URL template with {} in the place where the generated key goes.
-    charset
+    charset : str
         A string specifying the types of characters to be included in the key.
         The string can be any combination of the following:
             - a lowercase letter (a-z)
@@ -38,25 +25,28 @@ def urlgen(template: str, charset: str, length: int) -> str:
         can contain lowercase letters. If it contains an uppercase letter, the
         key can contain uppercase letters. If it contains a digit, the key can
         contain digits.
-    length
+    length : int
         The length of the key.
 
     Returns
     -------
-    new_url
+    new_url : str
         A randomly-generated URL that matches the definition.
+
     """
     # Generate the random pool based on the specified charset. First, we need
     # to initialize the character pool.
     pool = set()
     # Next, parse each character in the specified charset.
     for character in list(charset):
-        # Check to see if the character is uppercase, lowercase, or digit.
-        for chars in [
+        # Define the enabled character sets.
+        charsets = [
             string.ascii_lowercase,
             string.ascii_uppercase,
             string.digits,
-        ]:
+        ]
+        # Check to see which character sets have been enabled.
+        for chars in charsets:
             # Depending on the character type, append that set of characters
             # to the pool.
             pool = pool.union(set(chars) if character in chars else set())
