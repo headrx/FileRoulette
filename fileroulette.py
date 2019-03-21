@@ -11,7 +11,7 @@ import webbrowser  # this isnt used
 import requests
 from bs4 import BeautifulSoup
 
-from urlgen import urlgen
+from fileroulette.libs.urlgen import urlgen
 
 # Modular interaction by request from TorHackr
 supported_platforms = ["ufile", "discord"]  # for line 204 check below
