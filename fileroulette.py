@@ -6,9 +6,17 @@ import queue
 import random
 import requests
 import threading
-import webbrowser
+import webbrowser # this isnt used
 from bs4 import BeautifulSoup
 from urlgen import urlgen
+import argparse
+
+
+#Modular interaction by request from TorHackr
+supported_platforms = ["ufile","discord"] # for line 204 check below
+parser = argparse.ArgumentParser(description="Choose a platform you want to scan example:python fileroulette.py -t ufile")
+parser.add_argument("-t", help="Current platforms supported: uploadfiles.io, discordapp.com")
+args = parser.parse_args()
 
 # A list of user agents. We'll pick one at random every time.
 agents = [
@@ -50,7 +58,7 @@ def extract_filename(html):
         a, b = split_before(b, '</h3>')
         details_div = soup.find('div', class_="details")
         size = re.search('Size:(.*)', str(details_div.p))
-        details = [a, size.group(0)]  
+        details = [a, size.group(0)]
         return details
     except Exception as e:
         raise
@@ -58,6 +66,10 @@ def extract_filename(html):
 def generate_ufile_link():
     """Generate a random ufile.io link."""
     return urlgen("https://uploadfiles.io/{}", "a1", 5)
+
+def generate_dServer_link():
+    """Generate a random discord server link."""
+    return urlgen("https://discord.gg/{}", "aA1", 7)
 
 def get_head(url):
     """Request the headers for the specified URL."""
@@ -149,23 +161,50 @@ class ScanThread(threading.Thread):
                     pass
 
 
-print("Scanning for a live URL", end="", flush=True)
+print("[*]  Scanning for a live URL:\n", end="", flush=True)
 
-work_queue = queue.Queue()
-threads = list()
-for x in range(20):
-    # Start 20 threads.
-    thread = ScanThread(work_queue)
-    thread.start()
-    threads.append(thread)
+"""This will scan for the ufiles"""
+def scan_ufiles():
+    work_queue = queue.Queue()
+    threads = list()
+    for x in range(20):
+        # Start 20 threads.
+        thread = ScanThread(work_queue)
+        thread.start()
+        threads.append(thread)
 
-while work_queue.empty():
-    # Wait for a file to be found.
-    pass
+    while work_queue.empty():
+        # Wait for a file to be found.
+        pass
 
-(url, filename) = work_queue.get()
+    (url, filename) = work_queue.get()
 
-for thread in threads:
-    thread.stop()
-    thread.join()
+    for thread in threads:
+        thread.stop()
+        thread.join()
 
+"""This will scan for the discord links"""
+def discordlink_validator():
+    try:
+        """Check if the discord link is Valid."""
+        url = generate_dServer_link()
+        html = create_session().get(url).content.decode()
+        soup = BeautifulSoup(html, 'html.parser')
+        if '<meta content="Join the' in str(soup):
+            print("[+]  Found a valid discord server link: {}".format(url))
+            with open("valid_serverlinks.txt","a") as file:
+                file.write(str(url)+"\n")
+                discordlink_validator()
+        else:
+            print("[-]  Invalid server: {}".format(url)) #comment this line if you dont want traceback for nonworking servers
+            discordlink_validator()
+    except KeyboardInterrupt:
+        print("[*]  You stopped the script by pressing ctrl+c")
+
+if args.t in supported_platforms: #its args.t and not args.-t valid for the syntax
+    if args.t == "ufile":
+            scan_ufiles()
+    elif args.t == "discord":
+        discordlink_validator()
+else:
+    print("Invalid input: example run command: python fileroulette.py -t discord or python fileroulette.py -t ufile")
