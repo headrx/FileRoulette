@@ -78,9 +78,7 @@ class Module(BaseModule):
         if "download this file" in content:
             # If the content contains information that should be saved, create
             # a return_data dict and store the data inside it.
-            return_data = {
-                "status": "success"
-            }
+            return_data = {"status": "success"}
             # Then return that data.
             return return_data
         # If the content is undesirable, return False.

@@ -197,7 +197,7 @@ class BaseModule:
         # Retrieve the page's header.
         (header, url) = self._get_page_header(session, url)
         # DEBUG: We're just checking what status code we get.
-        #print("Status code: {}".format(header.status_code))
+        # print("Status code: {}".format(header.status_code))
         if header.status_code == 200:
             # The request was a success. Return the text of the site.
             return session.get(url).content.decode()
@@ -274,18 +274,18 @@ class BaseModule:
 
         Returns
         -------
-        a : str
+        pre : str
             The string preceeding and including the target substring.
-        b : str
+        post : str
             The string proceeding the target substring.
 
         """
         if target not in source:
             return "", ""
         index = source.find(target) + len(target)
-        a = source[:index]
-        b = source[index:]
-        return a, b
+        pre = source[:index]
+        post = source[index:]
+        return pre, post
 
     @staticmethod
     def _split_before(source, target):
@@ -304,18 +304,18 @@ class BaseModule:
 
         Returns
         -------
-        a : str
+        pre : str
             The string preceeding the target substring.
-        b : str
+        post : str
             The string proceeding and including the target substring.
 
         """
         if target not in source:
             return "", ""
         index = source.find(target)
-        a = source[:index]
-        b = source[index:]
-        return a, b
+        pre = source[:index]
+        post = source[index:]
+        return pre, post
 
     def check_output(self, content):
         """Check the content of the page to extract useful information.
@@ -339,12 +339,11 @@ class BaseModule:
             scanning.
 
         """
-        pass
+        return False
 
     def run(self):
         """Start the module's main loop."""
         print("Running {} module...".format(self.name))
         session = self._create_new_session()
         while not self._execute_scan(session):
-            print(".", end="", flush=True)
-        print("\nScan succeeded!")
+            pass
