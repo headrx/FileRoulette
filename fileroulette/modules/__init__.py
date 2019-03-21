@@ -1,15 +1,8 @@
 """FileRoulette Module Library.
 
 This library defines the BaseModule template, from which new data source
-modules can be derived.
-
-Contents
---------
-__init__.py
-    Contains the module foundation, from which all other modules are derived.
-demo.py
-    A demonstration module that exists to show, simply, how a data source
-    module can be constructed. (This module is non-functional.)
+modules can be derived. To learn more about making a new data source module,
+see the demo.py module.
 """
 
 import random
