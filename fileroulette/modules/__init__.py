@@ -60,6 +60,45 @@ AGENTS = [
 # Default to the Tor Browser user agent.
 DEF_AGENT = "Mozilla/5.0 (Windows NT 6.1; rv:52.0) Gecko/20100101 Firefox/52.0"
 
+# The following dictionary contains dicts of HTTP status codes that would
+# signal some kind of problem with our request. If any of these codes should
+# warrant a rejection of the URL without user notification, move them to the
+# "rejected" dict.
+STATUS_CODES = {
+    "rejected": {400: "Bad Request", 404: "Not Found", 410: "Gone"},
+    "forbidden": {401: "Unauthorized", 403: "Forbidden"},
+    "unexpected": {
+        405: "Method Not Allowed",
+        406: "Not Acceptable",
+        418: "I'm a Teapot!",
+        420: "Enhance Your Calm",
+    },
+    "error": {
+        408: "Request Timeout",
+        421: "Misdirected Request",
+        423: "Locked",
+        429: "Too Many Requests",
+        496: "SSL Certificate Required",
+        500: "Internal Server Error",
+        502: "Bad Gateway",
+        503: "Service Unavailable",
+        504: "Gateway Timeout",
+        505: "HTTP Version Not Supported",
+        509: "Bandwidth Limit Exceeded",
+    },
+    "cloudflare": {
+        520: "Unknown Error (Cloudflare)",
+        521: "Website is Down (Cloudflare)",
+        522: "Connection Timed Out (Cloudflare)",
+        523: "Origin is Unreachable (Cloudflare)",
+        524: "A Timeout Occurred (Cloudflare)",
+        525: "SSL Handshake Failed (Cloudflare)",
+        527: "Railgun Error (Cloudflare)",
+        530: "Origin DNS Error (Cloudflare)",
+    },
+}
+
+
 # ---[ BASE MODULE DEFINITION ]--- #
 
 
@@ -106,6 +145,73 @@ class BaseModule:
             # Default to the Tor Browser user agent.
             session.headers.update({"User-Agent": DEF_AGENT})
         return session
+
+    def _get_page_content(self, session, url):
+        """Retrieve the HTML content for the specified URL.
+
+        Parameters
+        ----------
+        session
+            The session with which we will retrieve the URL.
+        url
+            The URL we will be retrieving.
+
+        Returns
+        -------
+        content or False
+            This function returns False if the content could not be loaded,
+            otherwise it will return the text content of the retrieved page.
+
+        """
+        # Retrieve the page's header.
+        (header, url) = self._get_page_header(session, url)
+        if header.status_code == 200:
+            # The request was a success. Return the text of the site.
+            return session.get(url).content.decode()
+        # Check for alternate status codes.
+        if header.status_code in STATUS_CODES["rejected"]:
+            # The URL is invalid or unavailable.
+            return False
+        for _, codes in STATUS_CODES.items():
+            # There's an unexpected status code.
+            if header.status_code in codes.keys():
+                # Print out the status code information.
+                print(
+                    "{}: {} ({})".format(
+                        header.status_code, codes[header.status_code], url
+                    )
+                )
+                return False
+        # We've encountered an unknown status code.
+        print("{}: Unknown ({})".format(header.status_code, url))
+        return False
+
+    @staticmethod
+    def _get_page_header(session, url):
+        """Retrieve the HTTP header for the specified URL.
+
+        Parameters
+        ----------
+        session
+            The session with which we will retrieve the URL.
+        url
+            The URL we will be retrieving.
+
+        Returns
+        -------
+        header
+            The HTTP result header returned from the target site.
+        url
+            The URL of the page. If the header redirects to another URL, it
+            will return the target URL. Otherwise, it will return the original.
+
+        """
+        header = session.head(url)
+        if header.is_redirect:
+            # If we're being redirected, grab the headers for the target URL.
+            url = header.headers["Location"]
+            header = session.head(url)
+        return (header, url)
 
     def _new_url(self) -> str:
         """Generate a new random URL.
