@@ -5,7 +5,8 @@ modules can be derived. To learn more about making a new data source module,
 see the demo.py module.
 """
 
-# TODO: Enable multithreading and proxies.
+# TODO: Enable multithreading and proxies, and allow for users to choose
+#       whether they want to use random user agents or not.
 
 import random
 import requests
@@ -98,16 +99,32 @@ STATUS_CODES = {
 
 
 class BaseModule:
-    """Define the core structures common to all data source modules."""
+    """Define the core structures common to all data source modules.
 
-    # The allowed_chars defines what kinds of characters can be used in the
-    # randomly-generated key.
+    Attributes
+    ----------
+    allowed_chars : str
+        This defines what kind of characters can be used in the
+        randomly-generated key. This string only needs up to three characters,
+        one upper-case letter, one lower-case letter, and/or one number. This
+        will determine whether upper-case letters, lower-case letters, or
+        numbers (respectively) will be included in the key. For example, to
+        allow all three, you could set allowed_chars to 'aA1'.
+    base_url : str
+        The template URL which will be modified with the randomly-generated key
+        as defined by the allowed_chars and key_length variables. The key will
+        be inserted wherever the open and closed brackets {} appear.
+    key_length : int
+        An integer which defines the length of the randomly-generated key.
+    random_agent : bool
+        This will determine whether each newly-generated requests session will
+        use a random user agent. If not, it will use a Tor Browser user agent.
+
+    """
+
     allowed_chars = str()
-    # The base_url defines the URL used by urlgen to create random URLs.
     base_url = str()
-    # The key_length defines how long the randomly-generated key should be.
     key_length = int()
-    # Decide whether to use a randomized user agent for every request.
     random_agent = False
 
     def __init__(self, module_name):

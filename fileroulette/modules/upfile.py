@@ -26,6 +26,8 @@ class Module(BaseModule):
         self.allowed_chars = "a1"
         # Set the randomly-generated key length.
         self.key_length = 5
+        # Disable random user agents.
+        self.random_agent = False
 
     def check_output(self, content):
         """Check the content of the page to extract useful information."""

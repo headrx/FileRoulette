@@ -53,6 +53,8 @@ class Module(BaseModule):
         self.allowed_chars = "aA1"
         # Set the randomly-generated key length.
         self.key_length = 5
+        # Determine whether we should choose a random user agent for sessions.
+        self.random_agent = False
 
     def check_output(self, content):
         """Check the content of the page to extract useful information.
