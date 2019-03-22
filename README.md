@@ -26,6 +26,45 @@ There are two main executable files currently in the root directory:
 
 It is advised that you use the `roulette.py` script instead of the `fileroulette.py` script, as it is under active development and your input can aid us in making the script better!
 
+Usage
+-----
+To learn how to use the `roulette.py`, simply run the script with the `-h` tag:
+
+    usage: roulette.py [-h] [-a] [-p] [-m MODULE]
+
+    Find random data on various hosting services.
+
+    optional arguments:
+      -h, --help  show this help message and exit
+      -a          enable random user-agent
+      -p          enable proxies (requires a proxies.txt file)
+      -m MODULE   choose data source module (omit to list available modules)
+
+To see which modules exist, use `./roulette.py` without any arguments at all:
+
+    Find random data on various hosting services.
+
+    Available modules:
+    ------------------
+    - upfile  find files on uploadfiles.io
+
+    For usage information, type ./roulette.py --help
+
+To enable random User-Agents, use the `-a` tag.
+
+To enable random SOCKS5 proxies, use the `-p` tag. In order for this to work, you'll need to have a proxy list (called `proxies.txt`) in the same directory with `roulette.py`. The proxy list must be formatted with one proxy per line, like this:
+
+    1.2.3.4:5678
+    1.2.3.4:5679
+    1.2.3.4:5670
+
+The script will only accept SOCKS5 proxies. If you wish to use Tor, you can use the following proxies in your `proxies.txt`:
+
+    127.0.0.1:9050
+    127.0.0.1:9150
+
+Port 9050 is used by the default Tor daemon, whereas port 9150 is enabled by the Tor Browser Bundle.
+
 Feedback
 --------
 If you have any problems, suggestions, or other feedback, please open a new issue with the "Issues" tab above!

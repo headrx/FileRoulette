@@ -10,6 +10,7 @@ see the demo.py module.
 
 import random
 import requests
+import sys
 
 from fileroulette.libs import urlgen
 
@@ -116,18 +117,26 @@ class BaseModule:
         be inserted wherever the open and closed brackets {} appear.
     key_length : int
         An integer which defines the length of the randomly-generated key.
+    proxies : list
+        If random_proxy is enabled, this list will be populated with (ip, port)
+        tuples pulled from the `proxies.txt` file in the app's root directory.
     random_agent : bool
         This will determine whether each newly-generated requests session will
         use a random user agent. If not, it will use a Tor Browser user agent.
+    random_proxy : bool
+        This will determine whether random proxies should be assigned to each
+        new session as it's created.
 
     """
 
     allowed_chars = str()
     base_url = str()
     key_length = int()
+    proxies = list()
     random_agent = False
+    random_proxy = False
 
-    def __init__(self, module_name):
+    def __init__(self, module_name, agent, proxy):
         """Initialize the module.
 
         Parameters
@@ -136,26 +145,69 @@ class BaseModule:
             The name of the module that derived from this BaseModule class.
 
         """
+        # Set the module's name.
         self.name = module_name
-        print("Initializing {} module...".format(self.name))
+        # Enable or disable random user agents.
+        self.random_agent = agent
+        # Enable or disable random proxies.
+        self.random_proxy = proxy
+
+        if self.random_proxy:
+            # If proxies are enabled, load them from the `proxies.txt` file.
+            self._load_proxies()
 
     def _create_new_session(self):
         """Create a new requests session.
 
         Returns
         -------
-        session
+        session or False
             A new instance of requests.sessions.Session with the qualities
-            specified by the user's requirements.
+            specified by the user's requirements. If a session cannot be made,
+            this will return False instead.
 
         """
         session = requests.Session()
+        # Check whether to enable a random User-Agent.
         if self.random_agent:
             # Choose a random agent from the AGENTS list.
             session.headers.update({"User-Agent": random.choice(AGENTS)})
         else:
             # Default to the Tor Browser user agent.
             session.headers.update({"User-Agent": DEF_AGENT})
+        # Check whether to enable a random proxy.
+        if self.random_proxy:
+            # Let the user know we're searching.
+            print("Searching for a working proxy", end="", flush=True)
+        while self.random_proxy:
+            try:
+                # Choose a proxy from the list.
+                (ip, port) = self.proxies.pop(0)
+            except IndexError:
+                # We are out of live proxies. Halt the program.
+                print("No more proxies available!")
+                sys.exit(0)
+            # Format and assign the chosen proxy.
+            proxy = "socks5h://{}:{}".format(ip, port)
+            session.proxies = {"http": proxy, "https": proxy}
+            # Test the proxy to see if it's working. To test the proxy, try to
+            # establish a connection to a website that should always be online,
+            # such as google.com.
+            print(".", end="", flush=True)
+            try:
+                # Retrieve google.com.
+                result = session.get("https://google.com/", timeout=1)
+                # If successful, re-add the proxy to the list to be used again.
+                self.proxies.append((ip, port))
+                print("Success!")
+                break
+            except (
+                requests.exceptions.ConnectionError,
+                requests.exceptions.InvalidSchema,
+                requests.exceptions.Timeout,
+            ):
+                # If unsuccessful, loop back and try another proxy.
+                continue
         return session
 
     def _execute_scan(self, session):
@@ -265,6 +317,33 @@ class BaseModule:
             header = session.head(url)
         return (header, url)
 
+    def _load_proxies(self):
+        """Load the `proxies.txt` file and store it in `self.proxies`."""
+        try:
+            with open("proxies.txt", "r") as proxy_file:
+                # Read the proxy list.
+                lines = proxy_file.readlines()
+        except FileNotFoundError:
+            # The file doesn't exist.
+            print("The file 'proxies.txt' could not be found.")
+            sys.exit(0)
+        for line in lines:
+            # Parse the list. Check each line for the ":" separator to ensure
+            # that the line contains an IP:port pairing.
+            if ":" in line:
+                try:
+                    # Extract the IP and port from the line.
+                    ip, port = line.split(":")
+                    # Append them to the self.proxies list.
+                    self.proxies.append((ip, int(port)))
+                except ValueError:
+                    # If there's a problem assigning the IP and port, there is
+                    # something wrong with how the proxy file is formatted.
+                    print("Proxy file contains improper formatting.")
+                    sys.exit(0)
+        # Now that we've loaded the proxies into the file... Shuffle 'em up.
+        random.shuffle(self.proxies)
+
     def _new_url(self):
         """Generate a new random URL.
 
@@ -364,5 +443,9 @@ class BaseModule:
         """Start the module's main loop."""
         print("Running {} module...".format(self.name))
         session = self._create_new_session()
+        while not session:
+            # Skip sessions that fail.
+            session = self._create_new_session()
+        # Scan until we find a match.
         while not self._execute_scan(session):
             pass

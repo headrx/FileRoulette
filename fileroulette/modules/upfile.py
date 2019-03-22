@@ -16,18 +16,17 @@ class Module(BaseModule):
     # A description of this particular module.
     description = "find files on uploadfiles.io"
 
-    def __init__(self):
+    # Set the base url for random generation.
+    base_url = "https://uploadfiles.io/{}"
+    # Set the character types allowed in the key.
+    allowed_chars = "a1"
+    # Set the randomly-generated key length.
+    key_length = 5
+
+    def __init__(self, agent, proxy):
         """Initialize the UploadFiles.io data source module."""
         # Initialize the BaseModule with the module name.
-        super(Module, self).__init__(MODULE_NAME)
-        # Set the base url for random generation.
-        self.base_url = "https://uploadfiles.io/{}"
-        # Set the character types allowed in the key.
-        self.allowed_chars = "a1"
-        # Set the randomly-generated key length.
-        self.key_length = 5
-        # Disable random user agents.
-        self.random_agent = False
+        super(Module, self).__init__(MODULE_NAME, agent, proxy)
 
     def check_output(self, content):
         """Check the content of the page to extract useful information."""

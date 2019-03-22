@@ -9,9 +9,9 @@ MODULE_DICT = module_loader.MODULE_DICT
 DESCRIPTION = "Find random data on various hosting services."
 
 
-def run_module(module_name):
+def run_module(module_name, agent=False, proxy=False):
     """Initialize and run the specified module."""
     # Initialize the specified module.
-    module = MODULE_DICT[module_name]()
+    module = MODULE_DICT[module_name](agent=agent, proxy=proxy)
     # Run the specified module.
     module.run()
