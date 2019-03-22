@@ -13,6 +13,7 @@ If you're interested in contributing to this project, simply fork it and get to 
 Requirements
 ------------
 * Python 3.5 or newer
+* pysocks
 * requests
 * beautifulsoup4
 
