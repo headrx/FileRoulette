@@ -2,10 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 
 def retrieve_latest_link(session):
-        
-        response = session.get('https://pastebin.com/u/DavidStorm', headers=headers)
-        #Get the source and open in soup
-        page_source = response.content
+        #Gets newest page link from pastebin and returns it for further processing
+        page_source = session.get('https://pastebin.com/u/DavidStorm', headers=headers).text
         soup = BeautifulSoup(page_source, 'html.parser')
         #Find our table and grab the link for latest post
         latest_pastes = soup.find('table', class_="maintable")
@@ -13,6 +11,7 @@ def retrieve_latest_link(session):
         return "https://pastebin.com/raw"+link['href']
 
 def get_list(url, session):
+    #Builds the list of proxys and writes to file
     proxies = []
     page_source = session.get(url, headers=headers).text
     #Create file / empty file if already present
