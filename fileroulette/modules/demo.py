@@ -39,22 +39,21 @@ class Module(BaseModule):
     # A description of this particular module.
     description = "a demonstration data source"
 
-    def __init__(self):
+    # Set the base url for random generation. The random key will replace
+    # the brackets {} in the string.
+    base_url = "https://example.site/files/{}"
+    # Set the character types allowed in the key. This can include digits,
+    # upper-case and/or lower-case letters, which will enable digits,
+    # upper-case and/or lower-case letters in the randomly-generated key.
+    # For example, this allowed_chars variable enables all three:
+    allowed_chars = "aA1"
+    # Set the randomly-generated key length.
+    key_length = 5
+
+    def __init__(self, agent, proxy):
         """Initialize the demo data source module."""
         # Initialize the BaseModule with the module name.
-        super(Module, self).__init__(MODULE_NAME)
-        # Set the base url for random generation. The random key will replace
-        # the brackets {} in the string.
-        self.base_url = "https://example.site/files/{}"
-        # Set the character types allowed in the key. This can include digits,
-        # upper-case and/or lower-case letters, which will enable digits,
-        # upper-case and/or lower-case letters in the randomly-generated key.
-        # For example, this allowed_chars variable enables all three:
-        self.allowed_chars = "aA1"
-        # Set the randomly-generated key length.
-        self.key_length = 5
-        # Determine whether we should choose a random user agent for sessions.
-        self.random_agent = False
+        super(Module, self).__init__(MODULE_NAME, agent, proxy)
 
     def check_output(self, content):
         """Check the content of the page to extract useful information.

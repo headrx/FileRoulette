@@ -15,6 +15,18 @@ if __name__ == "__main__":
     # Parse the command-line arguments.
     argparser = argparse.ArgumentParser(description=DESCRIPTION)
     argparser.add_argument(
+        "-a",
+        dest="agent",
+        action="store_true",
+        help="enable random user-agent",
+    )
+    argparser.add_argument(
+        "-p",
+        dest="proxy",
+        action="store_true",
+        help="enable proxies (requires a proxies.txt file)",
+    )
+    argparser.add_argument(
         "-m",
         dest="module",
         default="list",
@@ -54,4 +66,4 @@ if __name__ == "__main__":
         sys.exit(0)
 
     # Run the specified module.
-    run_module(args.module)
+    run_module(args.module, agent=args.agent, proxy=args.proxy)
