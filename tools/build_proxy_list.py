@@ -29,6 +29,7 @@ def create_session():
     # Return the session.
     return session
 
+
 def retrieve_latest_link(session):
     """Poll David Storm's PasteBin page to extract the latest paste URL.
 
@@ -80,6 +81,6 @@ def get_list():
     print("[!] Completed! Proxies saved in 'proxies.txt'.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Create the `proxies.txt` file with the latest proxy list.
     get_list()
