@@ -1,44 +1,85 @@
+#!/usr/bin/env python3
+
+"""Create a `proxies.txt` file from David Storm's regular PasteBin proxies."""
+
 import requests
 from bs4 import BeautifulSoup
 
+
+def create_session():
+    """Create a new Requests session.
+
+    Returns
+    -------
+    session
+        A new Requests session.
+
+    """
+    # Create the new Session.
+    session = requests.Session()
+    # Update the headers to use a default User-Agent.
+    headers = {
+        "user-agent": (
+            # We'll use the Tor Browser agent. It's short.
+            "Mozilla/5.0 (Windows NT 6.1; rv:52.0) Gecko/20100101 Firefox/52.0"
+        )
+    }
+    # Update the session headers.
+    session.headers.update(headers)
+    # Return the session.
+    return session
+
 def retrieve_latest_link(session):
-        #Gets newest page link from pastebin and returns it for further processing
-        page_source = session.get('https://pastebin.com/u/DavidStorm', headers=headers).text
-        soup = BeautifulSoup(page_source, 'html.parser')
-        #Find our table and grab the link for latest post
-        latest_pastes = soup.find('table', class_="maintable")
-        link = latest_pastes.find('a')
-        return "https://pastebin.com/raw"+link['href']
+    """Poll David Storm's PasteBin page to extract the latest paste URL.
 
-def get_list(url, session):
-    #Builds the list of proxys and writes to file
-    proxies = []
-    page_source = session.get(url, headers=headers).text
-    #Create file / empty file if already present
-    with open('proxies.txt', 'w') as proxy_file:
-        proxy_file.writelines(page_source)
-    #Open file, read in contents, grab ip address's, append to list, write to file
-    with open('proxies.txt', 'r+') as proxy_file:
-        data = proxy_file.readlines()
-        for line in data:
-            try:
-                current_line = line.split()
-                ip = current_line[2]
-                proxies.append(ip)
-                print('[+] Proxy Added : ', ip)
-            except:
-                pass
-    with open('proxies.txt', 'w') as proxy_file:
-        for ip in proxies:
-            proxy_file.write(ip+"\n")
-    print('[+] Completed')
+    Parameters
+    ----------
+    session
+        The Requests session used to retrieve the link from PasteBin.
 
-#Build session and add UA to headers
-session = requests.Session()
-headers = {"user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36"}
-#Get link for daily post
-url = retrieve_latest_link(session)
-#Get contents of pastebin page, clean, and output to proxies.txt
-get_list(url, session)
+    Returns
+    -------
+    url
+        The URL for the most recently-posted proxy list.
+
+    """
+    # Retrieve the page source.
+    page_source = session.get("https://pastebin.com/u/DavidStorm").text
+    # Parse it with Beautiful Soup.
+    soup = BeautifulSoup(page_source, "html.parser")
+    # Find the main table and grab the link for latest post.
+    latest_pastes = soup.find("table", class_="maintable")
+    link = latest_pastes.find("a")
+    # Return the latest URL.
+    return "https://pastebin.com/raw" + link["href"]
 
 
+def get_list():
+    """Build the list of proxies, then save it to `proxies.txt`."""
+    print("[*] Retrieving latest proxy list...")
+    # Create an empty proxy list.
+    proxies = list()
+    # Create a new session.
+    session = create_session()
+    # Retrieve the source code of the latest proxy list.
+    page_source = session.get(retrieve_latest_link(session)).text
+    # Parse the page_source and extract the proxies.
+    print("[*] Parsing list and extracting proxies...")
+    for line in page_source.split("\n"):
+        # Ensure the line contains a live proxy.
+        if "LIVE" in line:
+            # Split the line into its parts.
+            current_line = line.strip().split()
+            # Extract the proxy.
+            proxy = current_line[2]
+            proxies.append(proxy)
+            print("[+] Proxy Added : ", proxy)
+    # Write the proxies to the `proxies.txt` file.
+    with open("proxies.txt", "w") as proxy_file:
+        proxy_file.write("\n".join(proxies))
+    print("[!] Completed! Proxies saved in 'proxies.txt'.")
+
+
+if __name__ == '__main__':
+    # Create the `proxies.txt` file with the latest proxy list.
+    get_list()
