@@ -7,19 +7,19 @@ import random
 import re
 import threading
 import webbrowser  # this isnt used
-
+import json
 import requests
 from bs4 import BeautifulSoup
 
 from fileroulette.libs.urlgen import urlgen
 
 # Modular interaction by request from TorHackr
-supported_platforms = ["ufile", "discord"]  # for line 204 check below
+supported_platforms = ["ufile", "discord",'gofile.io']  # for line 204 check below
 parser = argparse.ArgumentParser(
     description="Choose a platform you want to scan example:python fileroulette.py -t ufile"
 )
 parser.add_argument(
-    "-t", help="Current platforms supported: uploadfiles.io, discordapp.com"
+    "-t", help="Current platforms supported: uploadfiles.io, discordapp.com, gofile.io"
 )
 args = parser.parse_args()
 
@@ -80,6 +80,10 @@ def generate_ufile_link():
 def generate_dServer_link():
     """Generate a random discord server link."""
     return urlgen("https://discord.gg/{}", "aA1", 7)
+    
+def generate_gofile_link():
+    """Generate a random gofile.io link. """
+    return urlgen("https://api.gofile.io/getUpload.php?c={}", "a1", 6)
 
 
 def get_head(url):
@@ -213,6 +217,27 @@ def discordlink_validator():
     except KeyboardInterrupt:
         print("[*]  You stopped the script by pressing ctrl+c")
 
+def scan_gofilesio():
+    try:
+        url = generate_gofile_link()
+        source = create_session().get(url).content.decode()
+        data = json.loads(source)
+        with open('gofilesio.txt', 'w') as gofile_register:
+            if data['status'] != "error":
+                file_name = data['data'][0]['name']
+                file_size = data['data'][0]['size']
+                print('\nFile Found !')
+                print('Filename: {}'.format(file_name))
+                print('Size: '.format(file_size))
+                print('-'*25)
+                gofile_register.writelines("https://gofile.io/c?="+url[38:] + ", " + str(file_name) + ", " + str(file_size))
+                scan_gofilesio()
+            else:
+                print('.',end="", flush=True)
+                scan_gofilesio()
+
+    except Exception as exception:
+        print('[-] Exception Raised : {}', exception)
 
 if (
     args.t in supported_platforms
@@ -221,7 +246,10 @@ if (
         scan_ufiles()
     elif args.t == "discord":
         discordlink_validator()
+    elif args.t == "gofile.io":
+        scan_gofilesio()
+        
 else:
     print(
-        "Invalid input: example run command: python fileroulette.py -t discord or python fileroulette.py -t ufile"
+        "Invalid input: example run command: python fileroulette.py -t discord or python fileroulette.py -t ufile or python fileroulette.py -t gofileio"
     )
