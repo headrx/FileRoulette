@@ -39,6 +39,7 @@ To learn how to use the `roulette.py`, simply run the script with the `-h` tag:
       -h, --help  show this help message and exit
       -a          enable random user-agent
       -p          enable proxies (requires a proxies.txt file)
+      -d          download a fresh proxies.txt file
       -m MODULE   choose data source module (omit to list available modules)
 
 To see which modules exist, use `./roulette.py` without any arguments at all:
@@ -58,6 +59,8 @@ To enable random SOCKS5 proxies, use the `-p` tag. In order for this to work, yo
     1.2.3.4:5678
     1.2.3.4:5679
     1.2.3.4:5670
+
+To download a fresh proxy list from [David Storm's PasteBin Proxy Page](https://pastebin.com/u/DavidStorm), use the `-d` tag. You can use this tag in conjunction with `-p` to download proxies before running the script, or you can use it without the `-p` tag to download proxies even if you're not going to use them.
 
 The script will only accept SOCKS5 proxies. If you wish to use Tor, you can use the following proxies in your `proxies.txt`:
 
