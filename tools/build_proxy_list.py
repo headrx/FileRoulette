@@ -76,7 +76,7 @@ def get_list():
             proxies.append(proxy)
             print("[+] Proxy Added : ", proxy)
     # Write the proxies to the `proxies.txt` file.
-    with open("proxies.txt", "w") as proxy_file:
+    with open("../proxies.txt", "w") as proxy_file:
         proxy_file.write("\n".join(proxies))
     print("[!] Completed! Proxies saved in 'proxies.txt'.")
 
