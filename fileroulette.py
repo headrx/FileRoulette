@@ -219,17 +219,22 @@ def discordlink_validator():
 
 def scan_gofilesio():
     try:
+        #Generate url, grab source and serialize response
         url = generate_gofile_link()
         source = create_session().get(url).content.decode()
         data = json.loads(source)
+        #Create/open file to save results to
         with open('gofilesio.txt', 'w') as gofile_register:
+            #Checks whether its a valid file request. error = non-valid, ok is valid
             if data['status'] != "error":
                 file_name = data['data'][0]['name']
                 file_size = data['data'][0]['size']
+                #Display file found results
                 print('\nFile Found !')
                 print('Filename: {}'.format(file_name))
                 print('Size: '.format(file_size))
                 print('-'*25)
+                #Write result to output file
                 gofile_register.writelines("https://gofile.io/c?="+url[38:] + ", " + str(file_name) + ", " + str(file_size))
                 scan_gofilesio()
             else:
