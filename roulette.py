@@ -10,6 +10,7 @@ import argparse
 import sys
 
 from fileroulette import DESCRIPTION, MODULE_DICT, run_module
+from tools.build_proxy_list import get_fresh_proxies
 
 if __name__ == "__main__":
     # Parse the command-line arguments.
@@ -64,6 +65,13 @@ if __name__ == "__main__":
         print(f"Error: Module '{args.module}' doesn't exist.")
         print(f"For a list of modules, simply run {sys.argv[0]}.")
         sys.exit(0)
+
+    # If using random proxies, retrieve the latest proxy list from David
+    # Storm's pastebin.
+    if args.proxy:
+        print("Retrieving fresh proxies...", end="", flush=True)
+        get_fresh_proxies()
+        print("Done!")
 
     # Run the specified module.
     run_module(args.module, agent=args.agent, proxy=args.proxy)

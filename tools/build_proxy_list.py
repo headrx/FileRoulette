@@ -55,17 +55,28 @@ def retrieve_latest_link(session):
     return "https://pastebin.com/raw" + link["href"]
 
 
-def get_list():
+def get_fresh_proxies(verbose=False):
     """Build the list of proxies, then save it to `proxies.txt`."""
-    print("[*] Retrieving latest proxy list...")
+    if verbose:
+        print("[*] Retrieving latest proxy list...")
     # Create an empty proxy list.
     proxies = list()
     # Create a new session.
     session = create_session()
-    # Retrieve the source code of the latest proxy list.
-    page_source = session.get(retrieve_latest_link(session)).text
+    try:
+        # Retrieve the source code of the latest proxy list.
+        page_source = session.get(
+            retrieve_latest_link(session), timeout=5
+        ).text
+    except requests.exceptions.ConnectionError:
+        print("Could not establish connection.")
+        sys.exit(0)
+    except requests.exceptions.Timeout:
+        print("Request timed out.")
+        sys.exit(0)
     # Parse the page_source and extract the proxies.
-    print("[*] Parsing list and extracting proxies...")
+    if verbose:
+        print("[*] Parsing list and extracting proxies...")
     for line in page_source.split("\n"):
         # Ensure the line contains a live proxy.
         if "LIVE" in line:
@@ -74,13 +85,15 @@ def get_list():
             # Extract the proxy.
             proxy = current_line[2]
             proxies.append(proxy)
-            print("[+] Proxy Added : ", proxy)
+            if verbose:
+                print("[+] Proxy Added : ", proxy)
     # Write the proxies to the `proxies.txt` file.
     with open("proxies.txt", "w") as proxy_file:
         proxy_file.write("\n".join(proxies))
-    print("[!] Completed! Proxies saved in 'proxies.txt'.")
+    if verbose:
+        print("[!] Completed! Proxies saved in 'proxies.txt'.")
 
 
 if __name__ == "__main__":
     # Create the `proxies.txt` file with the latest proxy list.
-    get_list()
+    get_fresh_proxies(verbose=True)
