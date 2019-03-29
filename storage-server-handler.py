@@ -44,7 +44,7 @@ def submit(module=None,url_number=None,file_name=None,file_size=None, expiration
         return "Module: {} Url: {} file_name: {} file_size:{} expiration:{}".format(module,modules[module],file_name,file_size,expiration)
 
 def load_json():
-    """Loads JSON structure from /database/files.json"""
+    """Loads JSON structure from database/files.json"""
     try:
         with open('database/files.json', 'r+') as json_file:
             data = json.load(json_file)
