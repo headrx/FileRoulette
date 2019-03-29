@@ -10,6 +10,7 @@ import argparse
 import sys
 
 from fileroulette import DESCRIPTION, MODULE_DICT, run_module
+from tools.build_proxy_list import get_fresh_proxies
 
 if __name__ == "__main__":
     # Parse the command-line arguments.
@@ -27,6 +28,12 @@ if __name__ == "__main__":
         help="enable proxies (requires a proxies.txt file)",
     )
     argparser.add_argument(
+        "-d",
+        dest="download",
+        action="store_true",
+        help="download a fresh proxies.txt file"
+    )
+    argparser.add_argument(
         "-m",
         dest="module",
         default="list",
@@ -35,8 +42,9 @@ if __name__ == "__main__":
     args = argparser.parse_args()
 
     # See if they defined a source module.
-    if args.module == "list":
-        # No module was defined. List the available modules, then exit.
+    if args.module == "list" and not args.download:
+        # No module was defined, and they're not just trying to download a new
+        # proxy list. List the available modules, then exit.
         print(f"{DESCRIPTION}\n\nAvailable modules:\n------------------")
         # Retrieve the list of module names from the MODULE_DICT.
         keys = list(MODULE_DICT.keys())
@@ -56,6 +64,22 @@ if __name__ == "__main__":
         print("\nFor usage information, type {} --help".format(sys.argv[0]))
         # Exit the program.
         sys.exit(0)
+
+    # If using random proxies, retrieve the latest proxy list from David
+    # Storm's pastebin.
+    if args.proxy and args.download:
+        print("Retrieving fresh proxies...", end="", flush=True)
+        get_fresh_proxies()
+        print("Done!")
+    elif args.download:
+        # The user can opt to download fresh proxies without using proxies.
+        print("Retrieving fresh proxies...", end="", flush=True)
+        get_fresh_proxies()
+        print("Done!")
+        if args.module == "list":
+            # The user can also opt to download fresh proxies without running
+            # a module.
+            sys.exit(0)
 
     # Ensure the module is valid.
     if args.module not in MODULE_DICT.keys():
